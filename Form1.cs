@@ -55,7 +55,7 @@ namespace Paint_1
         private void openGLControl_OpenGLDraw(object sender, RenderEventArgs args)
         {
 
-            OpenGL gl = openGLControl.OpenGL;
+            OpenGL gl = openGLControl.OpenGL;            
 
             //set color
             gl.Color(colorUserColor_Line.R / 255.0, colorUserColor_Line.G / 255.0, colorUserColor_Line.B / 255.0, 0);
@@ -250,7 +250,7 @@ namespace Paint_1
         }
 
         private void bt_circle_Click(object sender, EventArgs e)
-        {
+        {            
             shShape = 1;
         }
 
@@ -441,60 +441,5 @@ namespace Paint_1
         }
 
 
-    }
-    public class shape
-    {
-        public Point pStart, pEnd;
-        public List<Point> points;
-        public int shape_type;
-        public shape()
-        {
-            pStart = new Point(0, 0);
-            pEnd = new Point(0, 0);
-            shape_type = 0;
-            points = new List<Point>();
-        }
-        public shape(Point a, Point b, int t, List<Point> c)
-        {
-            pStart = a;
-            pEnd = b;
-            shape_type = t;
-            points = c;
-        }
-        public shape(Point a, Point b, int t)
-        {
-            pStart = a;
-            pEnd = b;
-            shape_type = t;
-            points = new List<Point>();
-        }
-        public Point Get_start()
-        {
-            return pStart;
-        }
-        public Point Get_end()
-        {
-            return pEnd;
-        }
-        public int Get_shape()
-        {
-            return shape_type;
-        }
-        public void Set_start(Point a)
-        {
-            pStart = a;
-        }
-        public void Set_end(Point a)
-        {
-            pEnd = a;
-        }
-        public void Set_shape(int a)
-        {
-            shape_type = a;
-        }
-    } //////////////////////////////////////////////////////////////////////////////////
-    public class polygon
-    {
-        public Stack<Point> points;
     }
 }
