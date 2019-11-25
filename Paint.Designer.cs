@@ -1,6 +1,8 @@
-﻿namespace Paint_1
+﻿using System;
+
+namespace Paint_1
 {
-    partial class Form1
+    partial class Paint
     {
         /// <summary>
         /// Required designer variable.
@@ -28,7 +30,6 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.bt_line = new System.Windows.Forms.Button();
             this.bt_polygon = new System.Windows.Forms.Button();
             this.bt_rectangle = new System.Windows.Forms.Button();
             this.bt_triangle = new System.Windows.Forms.Button();
@@ -42,19 +43,9 @@
             this.openGLControl = new SharpGL.OpenGLControl();
             this.bt_fill = new System.Windows.Forms.Button();
             this.colorDialog1 = new System.Windows.Forms.ColorDialog();
+            this.bt_line = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.openGLControl)).BeginInit();
             this.SuspendLayout();
-            // 
-            // bt_line
-            // 
-            this.bt_line.ForeColor = System.Drawing.SystemColors.ActiveCaptionText;
-            this.bt_line.Location = new System.Drawing.Point(3, 13);
-            this.bt_line.Name = "bt_line";
-            this.bt_line.Size = new System.Drawing.Size(75, 23);
-            this.bt_line.TabIndex = 1;
-            this.bt_line.Text = "Line";
-            this.bt_line.UseVisualStyleBackColor = true;
-            this.bt_line.Click += new System.EventHandler(this.bt_line_Click);
             // 
             // bt_polygon
             // 
@@ -65,7 +56,7 @@
             this.bt_polygon.TabIndex = 2;
             this.bt_polygon.Text = "Polygon";
             this.bt_polygon.UseVisualStyleBackColor = true;
-            this.bt_polygon.Click += new System.EventHandler(this.bt_polygon_Click);
+            this.bt_polygon.Click += new System.EventHandler(this._OnButtonClicked);
             // 
             // bt_rectangle
             // 
@@ -76,7 +67,7 @@
             this.bt_rectangle.TabIndex = 3;
             this.bt_rectangle.Text = "Rectangle";
             this.bt_rectangle.UseVisualStyleBackColor = true;
-            this.bt_rectangle.Click += new System.EventHandler(this.bt_rectangle_Click);
+            this.bt_rectangle.Click += new System.EventHandler(this._OnButtonClicked);
             // 
             // bt_triangle
             // 
@@ -87,7 +78,7 @@
             this.bt_triangle.TabIndex = 4;
             this.bt_triangle.Text = "Triangle";
             this.bt_triangle.UseVisualStyleBackColor = true;
-            this.bt_triangle.Click += new System.EventHandler(this.bt_triangle_Click);
+            this.bt_triangle.Click += new System.EventHandler(this._OnButtonClicked);
             // 
             // bt_pentagon
             // 
@@ -98,7 +89,7 @@
             this.bt_pentagon.TabIndex = 5;
             this.bt_pentagon.Text = "Pentagon";
             this.bt_pentagon.UseVisualStyleBackColor = true;
-            this.bt_pentagon.Click += new System.EventHandler(this.bt_pentagon_Click);
+            this.bt_pentagon.Click += new System.EventHandler(this._OnButtonClicked);
             // 
             // bt_hexagon
             // 
@@ -109,7 +100,7 @@
             this.bt_hexagon.TabIndex = 6;
             this.bt_hexagon.Text = "Hexagon";
             this.bt_hexagon.UseVisualStyleBackColor = true;
-            this.bt_hexagon.Click += new System.EventHandler(this.bt_hexagon_Click);
+            this.bt_hexagon.Click += new System.EventHandler(this._OnButtonClicked);
             // 
             // bt_circle
             // 
@@ -120,7 +111,7 @@
             this.bt_circle.TabIndex = 7;
             this.bt_circle.Text = "Circle";
             this.bt_circle.UseVisualStyleBackColor = true;
-            this.bt_circle.Click += new System.EventHandler(this.bt_circle_Click);
+            this.bt_circle.Click += new System.EventHandler(this._OnButtonClicked);
             // 
             // bt_ellipse
             // 
@@ -131,7 +122,7 @@
             this.bt_ellipse.TabIndex = 8;
             this.bt_ellipse.Text = "Ellipse";
             this.bt_ellipse.UseVisualStyleBackColor = true;
-            this.bt_ellipse.Click += new System.EventHandler(this.bt_ellipse_Click);
+            this.bt_ellipse.Click += new System.EventHandler(this._OnButtonClicked);
             // 
             // bt_undo
             // 
@@ -142,7 +133,7 @@
             this.bt_undo.TabIndex = 11;
             this.bt_undo.Text = "Undo";
             this.bt_undo.UseVisualStyleBackColor = true;
-            this.bt_undo.Click += new System.EventHandler(this.bt_undo_Click);
+            this.bt_undo.Click += new System.EventHandler(this._OnButtonClicked);
             // 
             // bt_clear
             // 
@@ -153,12 +144,14 @@
             this.bt_clear.TabIndex = 12;
             this.bt_clear.Text = "Clear all";
             this.bt_clear.UseVisualStyleBackColor = true;
-            this.bt_clear.Click += new System.EventHandler(this.bt_clear_Click);
+            this.bt_clear.Click += new System.EventHandler(this._OnButtonClicked);
             // 
             // comboBox1
             // 
             this.comboBox1.FormattingEnabled = true;
-            this.comboBox1.Location = new System.Drawing.Point(951, 43);
+            this.comboBox1.Items.AddRange(new object[] { 1.0f, 3.0f, 5.0f, 8.0f });
+            this.comboBox1.SelectedIndex = 0;
+            this.comboBox1.Location = new System.Drawing.Point(790, 45);
             this.comboBox1.Name = "comboBox1";
             this.comboBox1.Size = new System.Drawing.Size(62, 21);
             this.comboBox1.TabIndex = 13;
@@ -174,13 +167,14 @@
             this.openGLControl.RenderTrigger = SharpGL.RenderTrigger.TimerBased;
             this.openGLControl.Size = new System.Drawing.Size(1030, 419);
             this.openGLControl.TabIndex = 14;
-            this.openGLControl.OpenGLInitialized += new System.EventHandler(this.openGLControl_OpenGLInitialized);
-            this.openGLControl.OpenGLDraw += new SharpGL.RenderEventHandler(this.openGLControl_OpenGLDraw);
-            this.openGLControl.Resized += new System.EventHandler(this.openGLControl_Resized);
-            this.openGLControl.MouseClick += new System.Windows.Forms.MouseEventHandler(this.openGLControl_MouseClick);
-            this.openGLControl.MouseDown += new System.Windows.Forms.MouseEventHandler(this.openGLControl_MouseDown);
-            this.openGLControl.MouseMove += new System.Windows.Forms.MouseEventHandler(this.ctrl_openGLControl_MouseMove);
-            this.openGLControl.MouseUp += new System.Windows.Forms.MouseEventHandler(this.openGLControl_MouseUp);
+            this.openGLControl.OpenGLInitialized += new System.EventHandler(this._OnInit);
+            this.openGLControl.OpenGLDraw += new SharpGL.RenderEventHandler(this._OnDraw);
+            this.openGLControl.Resized += new System.EventHandler(this._OnResize);
+            this.openGLControl.MouseDown += new System.Windows.Forms.MouseEventHandler(this._OnMouseDown);
+            this.openGLControl.MouseMove += new System.Windows.Forms.MouseEventHandler(this._OnMouseMove);
+            this.openGLControl.MouseUp += new System.Windows.Forms.MouseEventHandler(this._OnMouseUp);
+            this.openGLControl.KeyUp += new System.Windows.Forms.KeyEventHandler(this._OnKeyUp);
+            this.openGLControl.KeyDown += new System.Windows.Forms.KeyEventHandler(this._OnKeyDown);
             // 
             // bt_fill
             // 
@@ -191,7 +185,18 @@
             this.bt_fill.TabIndex = 15;
             this.bt_fill.Text = "Fill";
             this.bt_fill.UseVisualStyleBackColor = true;
-            this.bt_fill.Click += new System.EventHandler(this.bt_fill_Click);
+            this.bt_fill.Click += new System.EventHandler(this._OnButtonClicked);
+            // 
+            // bt_line
+            // 
+            this.bt_line.ForeColor = System.Drawing.SystemColors.ActiveCaptionText;
+            this.bt_line.Location = new System.Drawing.Point(3, 13);
+            this.bt_line.Name = "bt_line";
+            this.bt_line.Size = new System.Drawing.Size(75, 23);
+            this.bt_line.TabIndex = 1;
+            this.bt_line.Text = "Line";
+            this.bt_line.UseVisualStyleBackColor = true;
+            this.bt_line.Click += new System.EventHandler(this._OnButtonClicked);
             // 
             // Form1
             // 
@@ -213,8 +218,7 @@
             this.Controls.Add(this.bt_line);
             this.ForeColor = System.Drawing.SystemColors.ControlLight;
             this.Name = "Form1";
-            this.Text = "Form1";
-            this.Load += new System.EventHandler(this.Form1_Load);
+            this.Text = "Paint - 1712159 - 1712202 - 1712209 - 1712318";
             ((System.ComponentModel.ISupportInitialize)(this.openGLControl)).EndInit();
             this.ResumeLayout(false);
 

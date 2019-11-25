@@ -59,5 +59,85 @@ namespace Paint_1.Properties {
                 resourceCulture = value;
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        internal static byte[] cursorRotateE {
+            get {
+                object obj = ResourceManager.GetObject("cursorRotateE", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        internal static byte[] cursorRotateN {
+            get {
+                object obj = ResourceManager.GetObject("cursorRotateN", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        internal static byte[] cursorRotateNE {
+            get {
+                object obj = ResourceManager.GetObject("cursorRotateNE", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        internal static byte[] cursorRotateNW {
+            get {
+                object obj = ResourceManager.GetObject("cursorRotateNW", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        internal static byte[] cursorRotateS {
+            get {
+                object obj = ResourceManager.GetObject("cursorRotateS", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        internal static byte[] cursorRotateSE {
+            get {
+                object obj = ResourceManager.GetObject("cursorRotateSE", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        internal static byte[] cursorRotateSW {
+            get {
+                object obj = ResourceManager.GetObject("cursorRotateSW", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        internal static byte[] cursorRotateW {
+            get {
+                object obj = ResourceManager.GetObject("cursorRotateW", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
     }
 }
