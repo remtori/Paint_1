@@ -50,13 +50,17 @@ namespace Paint_1
 
         public Color GetPixil(int x, int y)
         {
-            int o = x * (openGLControl.Size.Height - y) * 3;
+            int o = x + (openGLControl.Size.Height - y) * openGLControl.Size.Width;
+            o *= 3;
+
             return Color.FromArgb(pixels[o], pixels[o + 1], pixels[o + 2]);
         }
 
         public void SetPixil(int x, int y, Color c)
         {
-            int o = x * (openGLControl.Size.Height - y) * 3;
+            int o = x + (openGLControl.Size.Height - y) * openGLControl.Size.Width;
+            o *= 3;
+
             pixels[o + 0] = c.R;
             pixels[o + 1] = c.G;
             pixels[o + 2] = c.B;

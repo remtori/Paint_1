@@ -134,6 +134,9 @@ namespace Paint_1
         {
             if (fillColor == Color.White) return false;
 
+            Point size = maxCoord - minCoord;
+            if (size.X < 2 && size.Y < 2) return false;
+
             if (Paint.INSTANCE.IsFillModeFlood())
                 FloodFillShape();
             else
@@ -152,13 +155,15 @@ namespace Paint_1
                 (int)Math.Floor(p.Y)
             ));
 
-            void TryEnqueue(int x, int y)
+            Func<int, int, bool> TryEnqueue = (x, y) =>
             {
                 if (Paint.INSTANCE.IsInCanvas(x, y) &&
                     Paint.INSTANCE.GetPixil(x, y).ToArgb() == Color.White.ToArgb()
                 )
                     q.Enqueue(new System.Drawing.Point(x, y));
-            }
+
+                return true;
+            };
 
             while (q.Count > 0)
             {

@@ -1,29 +1,19 @@
-﻿using System.Drawing;
+﻿using System;
 
 namespace Paint_1
 {
-    class Triangle : SimpleShape
+    class Triangle : Circle
     {
         public Triangle(float x, float y, float lw)
-            : base(x, y, lw, 1)
+            : base(x, y, lw)
         {
-            isFixedScale = true;
+            vertexCount = 3;
+            angleOffset = -Math.PI / 2;
         }
 
         public override EShape GetShape()
         {
             return EShape.TRIANGLE;
         }
-
-        protected override Point[] GetVerticies()
-        {
-            Point p = (controlPoints[(int)EPos.TopLeft] + controlPoints[(int)EPos.TopRight]) / 2;
-
-            return new Point[] {
-                p,
-                controlPoints[(int)EPos.BottomLeft],
-                controlPoints[(int)EPos.BottomRight]
-            };
-        }        
     }
 }
