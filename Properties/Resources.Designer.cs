@@ -61,82 +61,82 @@ namespace Paint_1.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized resource of type System.Byte[].
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static byte[] cursorRotateE {
+        internal static System.Drawing.Bitmap circle {
             get {
-                object obj = ResourceManager.GetObject("cursorRotateE", resourceCulture);
-                return ((byte[])(obj));
+                object obj = ResourceManager.GetObject("circle", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
             }
         }
         
         /// <summary>
-        ///   Looks up a localized resource of type System.Byte[].
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static byte[] cursorRotateN {
+        internal static System.Drawing.Bitmap ellipse {
             get {
-                object obj = ResourceManager.GetObject("cursorRotateN", resourceCulture);
-                return ((byte[])(obj));
+                object obj = ResourceManager.GetObject("ellipse", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
             }
         }
         
         /// <summary>
-        ///   Looks up a localized resource of type System.Byte[].
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static byte[] cursorRotateNE {
+        internal static System.Drawing.Bitmap hexagon {
             get {
-                object obj = ResourceManager.GetObject("cursorRotateNE", resourceCulture);
-                return ((byte[])(obj));
+                object obj = ResourceManager.GetObject("hexagon", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
             }
         }
         
         /// <summary>
-        ///   Looks up a localized resource of type System.Byte[].
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static byte[] cursorRotateNW {
+        internal static System.Drawing.Bitmap line {
             get {
-                object obj = ResourceManager.GetObject("cursorRotateNW", resourceCulture);
-                return ((byte[])(obj));
+                object obj = ResourceManager.GetObject("line", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
             }
         }
         
         /// <summary>
-        ///   Looks up a localized resource of type System.Byte[].
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static byte[] cursorRotateS {
+        internal static System.Drawing.Bitmap pentagon {
             get {
-                object obj = ResourceManager.GetObject("cursorRotateS", resourceCulture);
-                return ((byte[])(obj));
+                object obj = ResourceManager.GetObject("pentagon", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
             }
         }
         
         /// <summary>
-        ///   Looks up a localized resource of type System.Byte[].
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static byte[] cursorRotateSE {
+        internal static System.Drawing.Bitmap polygon {
             get {
-                object obj = ResourceManager.GetObject("cursorRotateSE", resourceCulture);
-                return ((byte[])(obj));
+                object obj = ResourceManager.GetObject("polygon", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
             }
         }
         
         /// <summary>
-        ///   Looks up a localized resource of type System.Byte[].
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static byte[] cursorRotateSW {
+        internal static System.Drawing.Bitmap rectangle {
             get {
-                object obj = ResourceManager.GetObject("cursorRotateSW", resourceCulture);
-                return ((byte[])(obj));
+                object obj = ResourceManager.GetObject("rectangle", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
             }
         }
         
         /// <summary>
-        ///   Looks up a localized resource of type System.Byte[].
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static byte[] cursorRotateW {
+        internal static System.Drawing.Bitmap triangle {
             get {
-                object obj = ResourceManager.GetObject("cursorRotateW", resourceCulture);
-                return ((byte[])(obj));
+                object obj = ResourceManager.GetObject("triangle", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
             }
         }
     }

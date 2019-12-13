@@ -1,54 +1,5 @@
 ﻿namespace Paint_1
 {
-    class Point
-    {
-        public float X, Y;
-        public Point(float x, float y)
-        {
-            X = x;
-            Y = y;
-        }
-
-        public static Point operator +(Point p1, Point p2)
-        {
-            return new Point(p1.X + p2.X, p1.Y + p2.Y);
-        }
-
-        public static Point operator -(Point p1, Point p2)
-        {
-            return new Point(p1.X - p2.X, p1.Y - p2.Y);
-        }
-
-        public static Point operator *(Point a, Point b)
-        {
-            return new Point(a.X * b.X, a.Y * b.Y);
-        }
-
-        public static Point operator *(Point p, float d)
-        {
-            return new Point(p.X * d, p.Y * d);
-        }
-
-        public static Point operator /(Point p, float d)
-        {
-            return new Point(p.X / d, p.Y / d);
-        }
-    }
-
-    class Color
-    {
-        public int R, G, B;
-        public Color(int r, int g, int b)
-        {
-            R = r; G = g; B = b;
-        }
-
-        public void Apply(SharpGL.OpenGL gl)
-        {
-            gl.Color(R / 255.0f, G / 255.0f, B / 255.0f, 1.0f);
-        }
-    }
-
     enum EShape
     {
         LINE, TRIANGLE, RECTANGLE,
@@ -64,6 +15,23 @@
     public enum ECursors
     {
         SizeNWSE, SizeNESW, SizeWE, SizeNS, SizeAll,
-        RotateN, RotateE, RotateS, RotateW, RotateNW, RotateNE, RotateSW, RotateSE
+        RotateN, RotateE, RotateS, RotateW, RotateNW, RotateNE, RotateSW, RotateSE,
+        Fill
+    }
+
+    public enum EPos
+    {
+        None = -1,
+        PositionOffset = -2, // Độ lệch của hình
+        Rotation = -3,       // Cùng với Center điểu khiển góc xoay của hình
+        RotationOffset = -4, // Độ lệch của Rotation so với Center
+
+        // 8 điểm điều khiển ở 8 hướng
+        // Vì những điểm này sẽ dùng phép "/" và "%" 
+        // để lấy hàng và cột nó thuộc về nên những con số này bắt buộc phải như sau
+        // vd: BottomLeft = 6, nghĩa là nó nằm ở hàng 6 / 3 = 2, cột 6 % 3 = 0
+        TopLeft    = 0, Top    = 1, TopRight    = 2,
+        Left       = 3, Center = 4, Right       = 5,
+        BottomLeft = 6, Bottom = 7, BottomRight = 8
     }
 }

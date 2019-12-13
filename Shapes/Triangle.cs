@@ -1,17 +1,13 @@
-﻿namespace Paint_1
-{
-    class Triangle : Shape
-    {
-        public Triangle(float x, float y, Color c, float lw)
-            : base(x, y, c, lw)
-        {
-        }
+﻿using System.Drawing;
 
-        public override void DrawShape()
+namespace Paint_1
+{
+    class Triangle : SimpleShape
+    {
+        public Triangle(float x, float y, float lw)
+            : base(x, y, lw, 1)
         {
-            DrawLine(controlPoints[2 * 3 + 2], controlPoints[2 * 3 + 0]);
-            DrawLine(controlPoints[0 * 3 + 1], controlPoints[2 * 3 + 2]);
-            DrawLine(controlPoints[2 * 3 + 0], controlPoints[0 * 3 + 1]);
+            isFixedScale = true;
         }
 
         public override EShape GetShape()
@@ -19,12 +15,15 @@
             return EShape.TRIANGLE;
         }
 
-        public override bool IsCollideWith(float x, float y)
+        protected override Point[] GetVerticies()
         {
-            Point p = new Point(x, y);
-            return IsCollideWithLine(p, controlPoints[2 * 3 + 2], controlPoints[2 * 3 + 0]) ||
-                IsCollideWithLine(p, controlPoints[0 * 3 + 1], controlPoints[2 * 3 + 2]) ||
-                IsCollideWithLine(p, controlPoints[2 * 3 + 0], controlPoints[0 * 3 + 1]);
-        }
+            Point p = (controlPoints[(int)EPos.TopLeft] + controlPoints[(int)EPos.TopRight]) / 2;
+
+            return new Point[] {
+                p,
+                controlPoints[(int)EPos.BottomLeft],
+                controlPoints[(int)EPos.BottomRight]
+            };
+        }        
     }
 }

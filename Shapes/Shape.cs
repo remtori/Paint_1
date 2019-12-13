@@ -1,5 +1,6 @@
 ﻿using SharpGL;
 using System;
+using System.Drawing;
 using System.Collections.Generic;
 using System.Windows.Forms;
 
@@ -7,70 +8,103 @@ namespace Paint_1
 {
     abstract class Shape
     {
-        static readonly float CPR = 10.0f; // Control Point Radius
-
-        protected Point offset;
-        protected float rotation;
+        public static readonly float CPR = 10.0f; // Control Point Radius
+        public static readonly int MAX_VERTEX_COUNT = 90; // Số lượng đỉnh tối đa cho 1 hình
 
         protected Color color;
+        protected Color fillColor;
         protected float lineWidth;
 
         protected bool isInitialDraw;
+        protected bool showControl;
+        protected bool isFixedScale;
 
-        protected int selectedCP;
-        protected bool useDefaultCP;
         protected Dictionary<int, Point> controlPoints;
+        protected int selectedCP;
 
-        protected float storedX, storedY;
-        protected static float mouseDownX, mouseDownY;
+        protected Mat2 rotationMat;
 
-        public static Shape CreateShape(EShape shape, float x, float y, Color c, float lW)
+        protected Point stored;
+        protected Point mouseDown;
+
+        protected Point minCoord;
+        protected Point maxCoord;
+
+        public static Shape CreateShape(EShape shape, float x, float y, float lW)
         {
             switch (shape)
             {
                 case EShape.LINE:
-                    return new Line(x, y, c, lW);
+                    return new Line(x, y, lW);
                 case EShape.TRIANGLE:
-                    return new Triangle(x, y, c, lW);
-
+                    return new Triangle(x, y, lW);
+                case EShape.RECTANGLE:
+                    return new Rectangle(x, y, lW);
+                case EShape.PENTAGON:
+                    return new Pentagon(x, y, lW);
+                case EShape.HEXAGON:
+                    return new Hexagon(x, y, lW);
+                case EShape.POLYGON:
+                    return new Polygon(x, y, lW);
+                case EShape.CIRCLE:
+                    return new Circle(x, y, lW);
+                case EShape.ELLIPSE:
+                    return new Ellipse(x, y, lW);
                 default:
                     throw new Exception("Unknown Shape!");
             }
         }
 
-        public Shape(float x, float y, Color c, float lW, bool defaultControlPoint = true)
+        public Shape(float x, float y, float lW, int controlLevel = 2)
         {
-            offset = new Point(0.0f, 0.0f);
-            rotation = 0.0f;
-
-            color = c;
+            color = Paint.INSTANCE.GetForegroundColor();
+            fillColor = Paint.INSTANCE.GetBackgroundColor();
             lineWidth = lW;
 
             isInitialDraw = true;
+            showControl = false;
+            isFixedScale = false;
 
-            selectedCP = -1;
+            selectedCP = (int)EPos.None;
+
+            rotationMat = new Mat2();
+
+            minCoord = new Point(float.MaxValue, float.MaxValue);
+            maxCoord = new Point(float.MinValue, float.MinValue);
+
             controlPoints = new Dictionary<int, Point>();
-            useDefaultCP = defaultControlPoint;
-            if (!defaultControlPoint) return;
 
-            controlPoints[0 * 3 + 0] = new Point(x, y);
-            controlPoints[0 * 3 + 1] = new Point(x, y);
-            controlPoints[0 * 3 + 2] = new Point(x, y);
-            controlPoints[1 * 3 + 0] = new Point(x, y);
-            controlPoints[1 * 3 + 2] = new Point(x, y);
-            controlPoints[2 * 3 + 0] = new Point(x, y);
-            controlPoints[2 * 3 + 1] = new Point(x, y);
-            controlPoints[2 * 3 + 2] = new Point(x, y);
+            controlPoints[(int)EPos.Center] = new Point(x, y);            
+            controlPoints[(int)EPos.PositionOffset] = new Point(x, y);
 
-            // Center of rotation
-            controlPoints[-1] = new Point(x, y);
+            if (controlLevel == 0) return;
 
-            SelectCP(8);
+            controlPoints[(int)EPos.Rotation] = new Point(x + 50, y);
+            controlPoints[(int)EPos.RotationOffset] = new Point(0, 0);
+
+            controlPoints[(int)EPos.TopLeft] = new Point(0, 0);
+            controlPoints[(int)EPos.TopRight] = new Point(0, 0);
+            controlPoints[(int)EPos.BottomLeft] = new Point(0, 0);
+            controlPoints[(int)EPos.BottomRight] = new Point(0, 0);
+
+            SelectCP((int)EPos.BottomRight);
+
+            if (controlLevel == 1) return;
+
+            controlPoints[(int)EPos.Top] = new Point(0, 0);
+            controlPoints[(int)EPos.Left] = new Point(0, 0);
+            controlPoints[(int)EPos.Right] = new Point(0, 0);
+            controlPoints[(int)EPos.Bottom] = new Point(0, 0);                        
         }
 
         public void SetColor(Color c)
         {
             color = c;
+        }
+
+        public void SetFillColor(Color c)
+        {
+            fillColor = c;
         }
 
         public void SetLineWidth(float lw)
@@ -80,37 +114,76 @@ namespace Paint_1
 
         public abstract EShape GetShape();
 
-        // Kiểm tra xem điểm (x, y) có thuộc hình đã được vẽ
+        // Kiểm tra xem điểm (x, y) tọa độ màn hình có thuộc hình đã được vẽ
         // Dùng để "chọn" các hình
         public abstract bool IsCollideWith(float x, float y);
 
-        // Kiểm tra xem điểm (x, y) có thuộc hình chữ nhật được tạo nên bởi các điểm điều khiển.
+        // Kiểm tra xem điểm (x, y) tọa độ màn hình có thuộc hình chữ nhật minCoord -> maxCoord
         // Dùng để "di chuyển" các hình
         public virtual bool IsInBoundingBox(float x, float y)
         {
-            if (!useDefaultCP) throw new Exception("Custom Control Point must overide this method.");
+            Point p = ScreenToWorld(new Point(x, y));            
 
-            Point m = new Point(x, y);
-            Point topLeftCP = controlPoints[0];
-            Point bottomRightCP = controlPoints[0];
-
-            foreach (KeyValuePair<int, Point> kv in controlPoints)
-            {
-                if (topLeftCP.X > kv.Value.X || topLeftCP.Y > kv.Value.Y)
-                    topLeftCP = kv.Value;
-
-                if (bottomRightCP.X < kv.Value.X || bottomRightCP.Y < kv.Value.Y)
-                    bottomRightCP = kv.Value;
-            }
-
-            return topLeftCP.X < m.X && m.X < bottomRightCP.X &&
-                topLeftCP.Y < m.Y && m.Y < bottomRightCP.Y;
+            return minCoord.X < p.X && p.X < maxCoord.X &&
+                minCoord.Y < p.Y && p.Y < maxCoord.Y;
         }
 
         public abstract void DrawShape();
 
+        public bool FillShape()
+        {
+            if (fillColor == Color.White) return false;
+
+            if (Paint.INSTANCE.IsFillModeFlood())
+                FloodFillShape();
+            else
+                ScanlineFillShape();
+
+            return true;
+        }
+
+        public virtual void FloodFillShape()
+        {
+            Point p = WorldToScreen(controlPoints[(int)EPos.Center]);
+
+            Queue<System.Drawing.Point> q = new Queue<System.Drawing.Point>();
+            q.Enqueue(new System.Drawing.Point(
+                (int)Math.Floor(p.X),
+                (int)Math.Floor(p.Y)
+            ));
+
+            void TryEnqueue(int x, int y)
+            {
+                if (Paint.INSTANCE.IsInCanvas(x, y) &&
+                    Paint.INSTANCE.GetPixil(x, y).ToArgb() == Color.White.ToArgb()
+                )
+                    q.Enqueue(new System.Drawing.Point(x, y));
+            }
+
+            while (q.Count > 0)
+            {
+                System.Drawing.Point cur = q.Dequeue();
+                Color c = Paint.INSTANCE.GetPixil(cur.X, cur.Y);
+
+                if (Color.White.ToArgb() != c.ToArgb()) continue;
+
+                Paint.INSTANCE.SetPixil(cur.X, cur.Y, fillColor);
+
+                TryEnqueue(cur.X + 1, cur.Y);
+                TryEnqueue(cur.X, cur.Y + 1);
+                TryEnqueue(cur.X - 1, cur.Y);
+                TryEnqueue(cur.X, cur.Y - 1);
+            }
+        }
+
+        public virtual void ScanlineFillShape()
+        {
+        }
+
         public void DrawControlPoint()
         {
+            if (!showControl) return;
+
             OpenGL gl = Paint.INSTANCE.gl;
 
             gl.PolygonMode(OpenGL.GL_FRONT, OpenGL.GL_FILL);
@@ -118,7 +191,10 @@ namespace Paint_1
 
             foreach (KeyValuePair<int, Point> kv in controlPoints)
             {
-                Point p = kv.Value + offset;
+                if (!IsInteractive(kv.Key)) continue;
+
+                Point p = WorldToScreen(kv.Value);
+
                 gl.Begin(OpenGL.GL_QUADS);
                 gl.Vertex(p.X - CPR / 2, p.Y - CPR / 2);
                 gl.Vertex(p.X + CPR / 2, p.Y - CPR / 2);
@@ -126,31 +202,24 @@ namespace Paint_1
                 gl.Vertex(p.X - CPR / 2, p.Y + CPR / 2);
                 gl.End();
             }
+
+            if (controlPoints.ContainsKey((int)EPos.Rotation))
+                DrawLine(controlPoints[(int)EPos.Center], controlPoints[(int)EPos.Rotation], Color.Blue);
         }
 
-        protected bool IsCollideWithLine(Point m, Point pS, Point pE)
+        protected void DrawLine(Point a, Point b, Color? c = null)
         {
-            double a = Dist(m, pS);
-            double b = Dist(m, pE);
-            double c = Dist(pS, pE);
-            double p = (a + b + c) / 2;
+            Color col = c.GetValueOrDefault(this.color);
 
-            double h = (2.0f / c) * Math.Sqrt(p * (p - a) * (p - b) * (p - c));
-
-            return h < (lineWidth / 2.0f) + 4.0f;
-        }
-
-        protected void DrawLine(Point a, Point b)
-        {
             OpenGL gl = Paint.INSTANCE.gl;
 
-            a = a + offset;
-            b = b + offset;
+            a = WorldToScreen(a);
+            b = WorldToScreen(b);
 
             // Lấy vector đơn vị của a -> b
             double vx = b.X - a.X;
             double vy = b.Y - a.Y;
-            double d = Dist(a, b);
+            double d = Dist(a, b) + float.Epsilon;
             vx /= d;
             vy /= d;
 
@@ -164,7 +233,7 @@ namespace Paint_1
             vy *= lineWidth / 2.0;
 
             gl.PolygonMode(OpenGL.GL_FRONT, OpenGL.GL_FILL);
-            color.Apply(gl);
+            gl.Color(col.R / 255.0f, col.G / 255.0f, col.B / 255.0f, 1.0f);
 
             gl.Begin(OpenGL.GL_QUADS);
             gl.Vertex(a.X - vx, a.Y - vy);
@@ -176,27 +245,68 @@ namespace Paint_1
 
         public virtual bool OnMouseMove(MouseEventArgs e)
         {
-            if (selectedCP == -1) return false;
+            if (selectedCP == (int)EPos.None) return false;
 
-            if (selectedCP == -2)
+            Point m = new Point(e.X, e.Y);
+            Point p = controlPoints[selectedCP];
+
+            if (selectedCP == (int)EPos.Rotation)
             {
-                offset.X = storedX + (e.X - mouseDownX);
-                offset.Y = storedY + (e.Y - mouseDownY);
+                Point newV = m - WorldToScreen(controlPoints[(int)EPos.Center]);                
+                rotationMat.ToRotation(- Math.Atan2(newV.Y, newV.X));               
+
                 return true;
             }
 
-            // Update control point position
-            Point p = controlPoints[selectedCP];
+            // Khoảng cách chuột đã di chuyển tính từ vị trí lúc bấm xuống
+            // Tọa độ thế giới
+            Point o = (m - mouseDown);
+
+            // Nếu đang cầm điểm điều khuyển và hình không thể chỉnh tỷ lệ
+            if (selectedCP >= 0 && isFixedScale)
+            {
+                o = o * rotationMat.GetInverse();
+                float t = Math.Min(Math.Abs(o.X), Math.Abs(o.Y));
+                int sX = Math.Sign(o.X);
+                int sY = Math.Sign(o.Y);
+
+                if (selectedCP == (int)EPos.TopLeft || selectedCP == (int)EPos.BottomRight)
+                {
+                    if (sX * sY == 1)
+                        o.Set(sX * t, sY * t);
+                    else
+                        o.Set(t, t);
+                }
+                else if (selectedCP == (int)EPos.TopRight || selectedCP == (int)EPos.BottomLeft)
+                {
+                    if (sX * sY == -1)
+                        o.Set(sX * t, sY * t);
+                    else
+                        o.Set(t, -t);
+                }
+            }
+
+            // Cập nhập vị trí của điểm kiểm soát được chọn
+            p.X = stored.X + o.X;
+            p.Y = stored.Y + o.Y;
+
+            // System.Diagnostics.Debug.WriteLine(String.Format("({0}, {1}) = ({2}, {3}) + ({4}, {5})", p.X, p.Y, stored.X, stored.Y, o.X, o.Y));
+
+            // Những điểm < 0 là những điểm ảo, không ảnh hưởng tới vị trí tương đối của các điểm khác
+            if (selectedCP < 0) return true;
+
+            minCoord = new Point(float.MaxValue, float.MaxValue);
+            maxCoord = new Point(float.MinValue, float.MinValue);
+
+            // Lấy số hàng và cột của điểm điều khiển hiện tại            
             int cRow = selectedCP / 3;
             int cCol = selectedCP % 3;
 
-            p.X = storedX + (e.X - mouseDownX);
-            p.Y = storedY + (e.Y - mouseDownY);
-
-            // Update all other control point
+            // Cập nhập các điểm điều khiển khác theo vị trí tương đối và theo hàng và cột
             foreach (KeyValuePair<int, Point> kv in controlPoints)
             {
-                if (kv.Value == p) continue;
+                if (!IsInteractive(kv.Key)) continue;
+
                 int row = kv.Key / 3;
                 int col = kv.Key % 3;
 
@@ -205,12 +315,37 @@ namespace Paint_1
 
                 if (col == cCol)
                     kv.Value.X = p.X;
+
+                if (kv.Key == (int)EPos.TopLeft ||
+                    kv.Key == (int)EPos.TopRight || 
+                    kv.Key == (int)EPos.BottomLeft || 
+                    kv.Key == (int)EPos.BottomRight)
+                {
+                    minCoord.X = Math.Min(kv.Value.X, minCoord.X);
+                    minCoord.Y = Math.Min(kv.Value.Y, minCoord.Y);
+                    maxCoord.X = Math.Max(kv.Value.X, maxCoord.X);
+                    maxCoord.Y = Math.Max(kv.Value.Y, maxCoord.Y);
+                }
             }
 
-            controlPoints[0 * 3 + 1] = (controlPoints[0 * 3 + 0] + controlPoints[0 * 3 + 2]) / 2;
-            controlPoints[2 * 3 + 1] = (controlPoints[2 * 3 + 0] + controlPoints[2 * 3 + 2]) / 2;
-            controlPoints[1 * 3 + 0] = (controlPoints[0 * 3 + 0] + controlPoints[2 * 3 + 0]) / 2;
-            controlPoints[1 * 3 + 2] = (controlPoints[0 * 3 + 2] + controlPoints[2 * 3 + 2]) / 2;
+            controlPoints[(int)EPos.TopLeft].Set(minCoord.X, minCoord.Y);
+            controlPoints[(int)EPos.TopRight].Set(maxCoord.X, minCoord.Y);
+            controlPoints[(int)EPos.BottomLeft].Set(minCoord.X, maxCoord.Y);
+            controlPoints[(int)EPos.BottomRight].Set(maxCoord.X, maxCoord.Y);
+
+            controlPoints[(int)EPos.Center] = (controlPoints[(int)EPos.TopLeft] + controlPoints[(int)EPos.BottomRight]) / 2;
+
+            // Căng giữa 4 điểm nằm ở 4 phương
+            if (controlPoints.ContainsKey((int)EPos.Top))
+            {
+                controlPoints[(int)EPos.Top] = (controlPoints[(int)EPos.TopLeft] + controlPoints[(int)EPos.TopRight]) / 2;
+                controlPoints[(int)EPos.Left] = (controlPoints[(int)EPos.TopLeft] + controlPoints[(int)EPos.BottomLeft]) / 2;
+                controlPoints[(int)EPos.Right] = (controlPoints[(int)EPos.TopRight] + controlPoints[(int)EPos.BottomRight]) / 2;
+                controlPoints[(int)EPos.Bottom] = (controlPoints[(int)EPos.BottomLeft] + controlPoints[(int)EPos.BottomRight]) / 2;
+            }
+
+            if (controlPoints.ContainsKey((int)EPos.Rotation))
+                controlPoints[(int)EPos.Rotation] = controlPoints[(int)EPos.Center] + controlPoints[(int)EPos.RotationOffset];            
 
             return true;
         }
@@ -218,62 +353,111 @@ namespace Paint_1
         public virtual bool OnMouseUp(MouseEventArgs e)
         {
             selectedCP = -1;
-            isInitialDraw = false;
-
-            foreach (KeyValuePair<int, Point> kv in controlPoints)
+            if (isInitialDraw)
             {
-                kv.Value.X = kv.Value.X + offset.X;
-                kv.Value.Y = kv.Value.Y + offset.Y;
+                isInitialDraw = false;
+                showControl = true;
             }
-
-            offset.X = 0;
-            offset.Y = 0;
-
             return true;
         }
 
         public virtual bool OnMouseDown(MouseEventArgs e)
         {
-            mouseDownX = e.X;
-            mouseDownY = e.Y;
+            mouseDown = new Point(e.X, e.Y);
+            Point m = ScreenToWorld(mouseDown);
 
-            if (selectedCP >= 0) return true;
+            if (controlPoints.ContainsKey((int)EPos.Rotation))
+            {
+                controlPoints[(int)EPos.RotationOffset] = controlPoints[(int)EPos.Rotation] - controlPoints[(int)EPos.Center];
+            }
+
+            if (selectedCP != (int)EPos.None) return true;
 
             foreach (KeyValuePair<int, Point> kv in controlPoints)
             {
-                if (Dist(e.X, e.Y, kv.Value.X, kv.Value.Y) < CPR)
+                if (!IsInteractive(kv.Key)) continue;
+
+                if (Dist(m.X, m.Y, kv.Value.X, kv.Value.Y) < CPR)
                 {
                     SelectCP(kv.Key);
                     return true;
                 }
             }
 
-            if (IsCollideWith(e.X, e.Y))
+            if (IsInBoundingBox(e.X, e.Y))
             {
-                selectedCP = -2;
-                storedX = offset.X;
-                storedY = offset.Y;
+                SelectCP((int)EPos.PositionOffset);
                 return true;
             }
 
             return false;
         }
 
-        protected void SelectCP(int index)
+        protected void SelectCP(int pos)
         {
-            selectedCP = index;
-            storedX = controlPoints[index].X;
-            storedY = controlPoints[index].Y;
+            selectedCP = pos;
+            stored = controlPoints[pos].Copy();
         }
 
-        protected double Dist(float x1, float y1, float x2, float y2)
+        protected Point ScreenToWorld(Point p)
+        {
+            // Dịch p về tâm để xoay
+            Point r = p - controlPoints[(int)EPos.Center] - controlPoints[(int)EPos.PositionOffset];
+            // Xoay theo hướng ngược lại
+            r = r * rotationMat.GetInverse();
+            // Dịch chuyển về lại vị trí cũ
+            r = r + controlPoints[(int)EPos.Center];
+
+            return r;
+        }
+
+        protected Point WorldToScreen(Point p)
+        {
+            // Dịch p về tâm của hình để xoay
+            Point r = p - controlPoints[(int)EPos.Center];
+            // Xoay p bằng affin qua ma trận
+            r = r * rotationMat;
+            // Dịch p về vị trí cũ và áp dụng offset
+            r = r + controlPoints[(int)EPos.Center] + controlPoints[(int)EPos.PositionOffset];
+
+            return r;
+        }
+
+        protected bool IsCollideWithLine(Point m, Point pS, Point pE)
+        {
+            double a = Dist(m, pS);
+            double b = Dist(m, pE);
+            double c = Dist(pS, pE);
+            double p = (a + b + c) / 2;
+
+            double h = (2.0f / c) * Math.Sqrt(p * (p - a) * (p - b) * (p - c));
+
+            return h < (lineWidth / 2.0f) + 4.0f;
+        }        
+
+        protected static double Dist(float x1, float y1, float x2, float y2)
         {
             return Math.Sqrt((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2));
         }
 
-        protected double Dist(Point a, Point b)
+        protected static double Dist(Point a, Point b)
         {
             return Dist(a.X, a.Y, b.X, b.Y);
+        }
+
+        protected static bool IsInteractive(int epos)
+        {
+            switch ((EPos) epos)
+            {
+                case EPos.None:
+                case EPos.Center:
+                case EPos.PositionOffset:
+                case EPos.RotationOffset:
+                    return false;
+
+                default:
+                    return true;
+            }
         }
     }
 }
