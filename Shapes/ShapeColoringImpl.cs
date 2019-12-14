@@ -4,13 +4,6 @@ using System.Collections.Generic;
 
 namespace Paint_1
 {
-    struct EdgeBucket
-    {
-        public int yMax, yMin;
-        public int x;
-        public float edge;
-    }
-
     abstract partial class Shape
     {        
         public bool FillShape()
@@ -65,47 +58,67 @@ namespace Paint_1
 
         public virtual void ScanlineFillShape()
         {
-            // 
-            List<EdgeBucket> edges = new List<EdgeBucket>();
-            List<EdgeBucket> activeList = new List<EdgeBucket>();
+            List<float> GiaoDiem = new List<float>();
 
-            Func<Point, Point, int> TryStoreEdge = (a, b) =>
+            float xMin, xMax, yMin, yMax;
+
+            xMin = xMax = verticies[0].X;
+            yMin = yMax = verticies[0].Y;
+
+            foreach (Point p in verticies)
             {
-                if (a.Y == b.Y) return 0;
+                if (xMin > p.X) xMin = p.X;
+                if (xMax < p.X) xMax = p.X;
+                if (yMin > p.Y) yMin = p.Y;
+                if (yMax < p.Y) yMax = p.Y;
+            }
 
-                EdgeBucket bucket = new EdgeBucket();
+            int i;
+            float x, y, x1, x2, y1, y2, temp;
+            y = yMin;
 
-                bucket.edge = 0.0f;
-                if (a.X != b.X)
-                {
-                    bucket.edge = 1.0f / (((float)(b.Y - a.Y)) / ((float)(b.X - a.X)));
-                }
-
-                if (a.Y > b.Y)
-                {
-                    bucket.yMax = (int) Math.Floor(a.Y);
-                    bucket.yMin = (int)Math.Floor(b.Y);
-                    bucket.x = (int)Math.Floor(b.X);
-                }
-                else
-                {
-                    bucket.yMax = (int)Math.Floor(b.Y);
-                    bucket.yMin = (int)Math.Floor(a.Y);
-                    bucket.x = (int)Math.Floor(a.X);
-                }
-
-                edges.Add(bucket);
-
-                return 0;
-            };
-
-            TryStoreEdge(WorldToScreen(verticies[0]), WorldToScreen(verticies[verticies.Count - 1]));
-            for (int i = 1; i < verticies.Count; i++)
-                TryStoreEdge(WorldToScreen(verticies[i - 1]), WorldToScreen(verticies[i]));
-
-            while (edges.Count > 0)
+            while (y <= yMax)
             {
+                GiaoDiem.Clear();
+                // với y tăng dần từ ymin > ymax,tìm các giao điểm của từng y với các cặp cạnh☻
+                for (i = 0; i < verticies.Count; i++)
+                {
+                    x1 = verticies[i].X;
+                    y1 = verticies[i].Y;
+                    x2 = verticies[(i + 1) % verticies.Count].X;
+                    y2 = verticies[(i + 1) % verticies.Count].Y;
 
+                    if (y2 < y1)
+                    {
+                        temp = x1; x1 = x2; x2 = temp;
+                        temp = y1; y1 = y2; y2 = temp;
+                    }
+
+                    if (y1 <= y && y <= y2)
+                    {
+                        if (y1 == y2) // nếu y của 2 đỉnh liên tiếp trùng nhau => bỏ qua
+                        {
+                            x = x1;
+                        }
+                        else
+                        {
+                            x = ((y - y1) * (x2 - x1)) / (y2 - y1); //hệ số góc
+                            x += x1;
+                        }
+
+                        if (xMin <= x && x <= xMax) GiaoDiem.Add(x);
+                    }
+                }
+
+                // với từng y tăng dần ta vẽ luôn đường thằng nối 2 giao điểm
+                for (i = 0; i < GiaoDiem.Count - 1; i += 2)
+                {
+                    Point A = new Point(GiaoDiem[i], y);
+                    Point B = new Point(GiaoDiem[i + 1], y);
+                    DrawLine(A, B, fillColor);
+                }
+
+                y++;
             }
         }
 

@@ -184,9 +184,10 @@ namespace Paint_1
                 DrawLine(controlPoints[(int)EPos.Center], controlPoints[(int)EPos.Rotation], Color.Blue);
         }
 
-        protected void DrawLine(Point a, Point b, Color? c = null)
+        protected void DrawLine(Point a, Point b, Color? c = null, float lW = 0)
         {
             Color col = c.GetValueOrDefault(this.color);
+            if (lW == 0) lW = lineWidth;
 
             OpenGL gl = Paint.INSTANCE.gl;
 
@@ -206,8 +207,8 @@ namespace Paint_1
             vy = t;
 
             // Tăng độ lớn theo độ dày của đường
-            vx *= lineWidth / 2.0;
-            vy *= lineWidth / 2.0;
+            vx *= lW / 2.0;
+            vy *= lW / 2.0;
 
             gl.PolygonMode(OpenGL.GL_FRONT, OpenGL.GL_FILL);
             gl.Color(col.R / 255.0f, col.G / 255.0f, col.B / 255.0f, 1.0f);

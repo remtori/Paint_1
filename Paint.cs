@@ -127,7 +127,11 @@ namespace Paint_1
             var watch = System.Diagnostics.Stopwatch.StartNew();
             foreach (Shape s in shapes) s.DrawShape();
             gl.Flush();
-            gl.ReadPixels(0, 0, openGLControl.Size.Width, openGLControl.Size.Height, OpenGL.GL_RGB, OpenGL.GL_UNSIGNED_BYTE, pixels);
+
+            if (IsFillModeFlood())
+            {
+                gl.ReadPixels(0, 0, openGLControl.Size.Width, openGLControl.Size.Height, OpenGL.GL_RGB, OpenGL.GL_UNSIGNED_BYTE, pixels);
+            }
 
             watch.Stop();
             if (shapes.Count > 0) avgTime = watch.ElapsedMilliseconds / shapes.Count;
@@ -143,9 +147,14 @@ namespace Paint_1
             if (filledShape != 0) avgTime = watch.ElapsedMilliseconds / filledShape;
             avgFillTime.Text = String.Format("Avg Fill Time: {0,4} ms", avgTime);
 
-            //for (int i = 0; i < 100; i++) SetPixil(i, i, Color.DarkCyan);
-
-            gl.DrawPixels(openGLControl.Size.Width, openGLControl.Size.Height, OpenGL.GL_RGB, pixels);
+            if (IsFillModeFlood())
+            {
+                gl.DrawPixels(openGLControl.Size.Width, openGLControl.Size.Height, OpenGL.GL_RGB, pixels);
+            }
+            else
+            {
+                foreach (Shape s in shapes) s.DrawShape();
+            }
 
             selectedShape?.DrawControlPoint();
 
