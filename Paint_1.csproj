@@ -73,7 +73,7 @@
     <Compile Include="Shapes\Rectangle.cs" />
     <Compile Include="Shapes\Shape.cs" />
     <Compile Include="Shapes\Line.cs" />
-    <Compile Include="Shapes\SimpleShape.cs" />
+    <Compile Include="Shapes\ShapeColoringImpl.cs" />
     <Compile Include="Shapes\Triangle.cs" />
     <Compile Include="Types.cs" />
     <EmbeddedResource Include="Paint.resx">

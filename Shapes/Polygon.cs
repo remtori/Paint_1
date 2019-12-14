@@ -6,10 +6,8 @@ using System.Collections.Generic;
 namespace Paint_1
 {
     class Polygon : Shape
-    {
-        protected List<Point> verticies;
+    {        
         protected Point initSize;
-
         protected Mat2 scaleMat;
 
         public Polygon(float x, float y, float lw)
@@ -21,7 +19,6 @@ namespace Paint_1
             scaleMat = new Mat2();
             initSize = new Point(0, 0);
 
-            verticies = new List<Point>();
             verticies.Add(new Point(x, y));
             verticies.Add(new Point(x, y));
         }
@@ -29,6 +26,11 @@ namespace Paint_1
         public override EShape GetShape()
         {
             return EShape.POLYGON;
+        }
+
+        protected override void ReCalcVerticies()
+        {
+            // Không phụ thuộc vào control point
         }
 
         public override void DrawShape()

@@ -48,7 +48,7 @@ namespace Paint_1
             pixels = new byte[MAX_CANVAS_SIZE * 3];
         }
 
-        public Color GetPixil(int x, int y)
+        public Color GetPixel(int x, int y)
         {
             int o = x + (openGLControl.Size.Height - y) * openGLControl.Size.Width;
             o *= 3;
@@ -56,7 +56,7 @@ namespace Paint_1
             return Color.FromArgb(pixels[o], pixels[o + 1], pixels[o + 2]);
         }
 
-        public void SetPixil(int x, int y, Color c)
+        public void SetPixel(int x, int y, Color c)
         {
             int o = x + (openGLControl.Size.Height - y) * openGLControl.Size.Width;
             o *= 3;
@@ -123,31 +123,31 @@ namespace Paint_1
         {
             gl.Clear(OpenGL.GL_COLOR_BUFFER_BIT);
 
-            foreach (Shape s in shapes)
-            {
-                s.DrawShape();
-            }
-
+            long avgTime = 0;
+            var watch = System.Diagnostics.Stopwatch.StartNew();
+            foreach (Shape s in shapes) s.DrawShape();
             gl.Flush();
             gl.ReadPixels(0, 0, openGLControl.Size.Width, openGLControl.Size.Height, OpenGL.GL_RGB, OpenGL.GL_UNSIGNED_BYTE, pixels);
 
-            int filledShape = 0;
-            var watch = System.Diagnostics.Stopwatch.StartNew();
-            foreach (Shape s in shapes)
-            {
-                if (s.FillShape()) filledShape++;
-            }
             watch.Stop();
+            if (shapes.Count > 0) avgTime = watch.ElapsedMilliseconds / shapes.Count;
+            avgDrawTime.Text = String.Format("Avg Draw Time: {0, 4} ms", avgTime);                       
 
-            long avgTime = 0;
+            watch.Reset();
+            watch.Start();
+            int filledShape = 0;            
+            foreach (Shape s in shapes) if (s.FillShape()) filledShape++;
+            watch.Stop();            
+
+            avgTime = 0;
             if (filledShape != 0) avgTime = watch.ElapsedMilliseconds / filledShape;
-
             avgFillTime.Text = String.Format("Avg Fill Time: {0,4} ms", avgTime);
+
+            //for (int i = 0; i < 100; i++) SetPixil(i, i, Color.DarkCyan);
 
             gl.DrawPixels(openGLControl.Size.Width, openGLControl.Size.Height, OpenGL.GL_RGB, pixels);
 
-            if (selectedShape != null)
-                selectedShape.DrawControlPoint();
+            selectedShape?.DrawControlPoint();
 
             gl.Flush();
         }
@@ -232,8 +232,12 @@ namespace Paint_1
                         }
                     }
                     break;
-
             }
+        }
+
+        private void _OnLineWidthChanged(object sender, EventArgs e)
+        {
+            selectedShape?.SetLineWidth((float) lineWidth.SelectedItem);
         }
 
         private void _OnMouseMove(object sender, MouseEventArgs e)
@@ -273,8 +277,6 @@ namespace Paint_1
 
             shapes.Add(selectedShape);
             selectedShape.OnMouseDown(e);
-            
-
         }
     }
 }

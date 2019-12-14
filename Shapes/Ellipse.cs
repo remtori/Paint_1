@@ -3,7 +3,7 @@ using System.Drawing;
 
 namespace Paint_1
 {
-    class Ellipse : SimpleShape
+    class Ellipse : Shape
     {
         public Ellipse(float x, float y, float lw)
                 : base(x, y, lw)
@@ -15,10 +15,9 @@ namespace Paint_1
             return EShape.ELLIPSE;
         }
 
-        protected override Point[] GetVerticies()
+        protected override void ReCalcVerticies()
         {
-            Point[] v = new Point[MAX_VERTEX_COUNT];
-
+            verticies.Clear();
             Point center = controlPoints[(int)EPos.Center];
             double rX = Dist(controlPoints[(int)EPos.Left], controlPoints[(int)EPos.Right]) / 2;
             double rY = Dist(controlPoints[(int)EPos.Top], controlPoints[(int)EPos.Bottom]) / 2;
@@ -26,13 +25,11 @@ namespace Paint_1
             for (int i = 0; i < MAX_VERTEX_COUNT; i++)
             {
                 double angle = 2 * Math.PI * i / MAX_VERTEX_COUNT;
-                v[i] = new Point(
+                verticies.Add(new Point(
                     (float)(rX * Math.Cos(angle) + center.X),
                     (float)(rY * Math.Sin(angle) + center.Y)
-                );
+                ));
             }
-
-            return v;
         }
 
         public override bool IsCollideWith(float x, float y)

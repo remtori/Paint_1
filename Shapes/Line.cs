@@ -10,6 +10,7 @@ namespace Paint_1
         {
             controlPoints[0] = new Point(0, 0);
             controlPoints[1] = new Point(0, 0);
+            ReCalcVerticies();
 
             SelectCP(1);
         }
@@ -19,14 +20,14 @@ namespace Paint_1
             return EShape.LINE;
         }
 
-        public override void DrawShape()
+        protected override void ReCalcVerticies()
         {
-            DrawLine(controlPoints[0], controlPoints[1]);
-        }
+            // Control point và verticies là cùng 1 đỉnh nên k cần tính lại
+            if (!isInitialDraw) return;
 
-        public override bool IsCollideWith(float x, float y)
-        {
-            return IsCollideWithLine(ScreenToWorld(new Point(x, y)), controlPoints[0], controlPoints[1]);
+            verticies.Clear();
+            verticies.Add(controlPoints[0]);
+            verticies.Add(controlPoints[1]);
         }
 
         public override bool IsInBoundingBox(float x, float y)

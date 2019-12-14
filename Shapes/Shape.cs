@@ -6,29 +6,33 @@ using System.Windows.Forms;
 
 namespace Paint_1
 {
-    abstract class Shape
+    abstract partial class Shape
     {
         public static readonly float CPR = 10.0f; // Control Point Radius
         public static readonly int MAX_VERTEX_COUNT = 90; // Số lượng đỉnh tối đa cho 1 hình
+
+        protected static Point stored;
+        protected static Point mouseDown;
 
         protected Color color;
         protected Color fillColor;
         protected float lineWidth;
 
-        protected bool isInitialDraw;
-        protected bool showControl;
-        protected bool isFixedScale;
+        protected bool isInitialDraw = true;
+        protected bool showControl = false;
+        protected bool isFixedScale = false;
 
-        protected Dictionary<int, Point> controlPoints;
-        protected int selectedCP;
+        protected int selectedCP = (int) EPos.None;
+        protected Dictionary<int, Point> controlPoints = new Dictionary<int, Point>();
 
-        protected Mat2 rotationMat;
+        protected Mat2 rotationMat = new Mat2();        
 
-        protected Point stored;
-        protected Point mouseDown;
+        protected Point minCoord = new Point(float.MaxValue, float.MaxValue);
+        protected Point maxCoord = new Point(float.MinValue, float.MinValue);
 
-        protected Point minCoord;
-        protected Point maxCoord;
+        protected List<Point> verticies = new List<Point>();
+        protected double angleOffset = 0;
+        protected int vertexCount = MAX_VERTEX_COUNT;
 
         public static Shape CreateShape(EShape shape, float x, float y, float lW)
         {
@@ -60,19 +64,6 @@ namespace Paint_1
             color = Paint.INSTANCE.GetForegroundColor();
             fillColor = Paint.INSTANCE.GetBackgroundColor();
             lineWidth = lW;
-
-            isInitialDraw = true;
-            showControl = false;
-            isFixedScale = false;
-
-            selectedCP = (int)EPos.None;
-
-            rotationMat = new Mat2();
-
-            minCoord = new Point(float.MaxValue, float.MaxValue);
-            maxCoord = new Point(float.MinValue, float.MinValue);
-
-            controlPoints = new Dictionary<int, Point>();
 
             controlPoints[(int)EPos.Center] = new Point(x, y);            
             controlPoints[(int)EPos.PositionOffset] = new Point(x, y);
@@ -114,9 +105,37 @@ namespace Paint_1
 
         public abstract EShape GetShape();
 
+        // Mặc định vẽ 1 hình "tròn" với vertexCount cạnh
+        protected virtual void ReCalcVerticies()
+        {
+            verticies.Clear();
+            Point center = controlPoints[(int)EPos.Center];
+            double R = Dist(controlPoints[(int)EPos.TopLeft], controlPoints[(int)EPos.BottomLeft]) / 2;
+
+            for (int i = 0; i < vertexCount; i++)
+            {
+                double angle = 2 * Math.PI * i / vertexCount + angleOffset;
+                verticies.Add(new Point(
+                    (float)(R * Math.Cos(angle) + center.X),
+                    (float)(R * Math.Sin(angle) + center.Y)
+                ));
+            }
+        }
+
         // Kiểm tra xem điểm (x, y) tọa độ màn hình có thuộc hình đã được vẽ
         // Dùng để "chọn" các hình
-        public abstract bool IsCollideWith(float x, float y);
+        public virtual bool IsCollideWith(float x, float y)
+        {
+            if (verticies.Count == 0) return false;
+
+            Point m = ScreenToWorld(new Point(x, y));
+
+            for (int i = 1; i < verticies.Count; i++)
+                if (IsCollideWithLine(m, verticies[i - 1], verticies[i]))
+                    return true;
+
+            return IsCollideWithLine(m, verticies[0], verticies[verticies.Count - 1]);
+        }
 
         // Kiểm tra xem điểm (x, y) tọa độ màn hình có thuộc hình chữ nhật minCoord -> maxCoord
         // Dùng để "di chuyển" các hình
@@ -128,61 +147,14 @@ namespace Paint_1
                 minCoord.Y < p.Y && p.Y < maxCoord.Y;
         }
 
-        public abstract void DrawShape();
-
-        public bool FillShape()
+        public virtual void DrawShape()
         {
-            if (fillColor == Color.White) return false;
+            if (verticies.Count < 2) return;
 
-            Point size = maxCoord - minCoord;
-            if (size.X < 2 && size.Y < 2) return false;
+            for (int i = 1; i < verticies.Count; i++)
+                DrawLine(verticies[i - 1], verticies[i]);
 
-            if (Paint.INSTANCE.IsFillModeFlood())
-                FloodFillShape();
-            else
-                ScanlineFillShape();
-
-            return true;
-        }
-
-        public virtual void FloodFillShape()
-        {
-            Point p = WorldToScreen(controlPoints[(int)EPos.Center]);
-
-            Queue<System.Drawing.Point> q = new Queue<System.Drawing.Point>();
-            q.Enqueue(new System.Drawing.Point(
-                (int)Math.Floor(p.X),
-                (int)Math.Floor(p.Y)
-            ));
-
-            Func<int, int, bool> TryEnqueue = (x, y) =>
-            {
-                if (Paint.INSTANCE.IsInCanvas(x, y) &&
-                    Paint.INSTANCE.GetPixil(x, y).ToArgb() == Color.White.ToArgb()
-                )
-                    q.Enqueue(new System.Drawing.Point(x, y));
-
-                return true;
-            };
-
-            while (q.Count > 0)
-            {
-                System.Drawing.Point cur = q.Dequeue();
-                Color c = Paint.INSTANCE.GetPixil(cur.X, cur.Y);
-
-                if (Color.White.ToArgb() != c.ToArgb()) continue;
-
-                Paint.INSTANCE.SetPixil(cur.X, cur.Y, fillColor);
-
-                TryEnqueue(cur.X + 1, cur.Y);
-                TryEnqueue(cur.X, cur.Y + 1);
-                TryEnqueue(cur.X - 1, cur.Y);
-                TryEnqueue(cur.X, cur.Y - 1);
-            }
-        }
-
-        public virtual void ScanlineFillShape()
-        {
+            DrawLine(verticies[0], verticies[verticies.Count - 1]);
         }
 
         public void DrawControlPoint()
@@ -252,8 +224,7 @@ namespace Paint_1
         {
             if (selectedCP == (int)EPos.None) return false;
 
-            Point m = new Point(e.X, e.Y);
-            Point p = controlPoints[selectedCP];
+            Point m = new Point(e.X, e.Y);            
 
             if (selectedCP == (int)EPos.Rotation)
             {
@@ -265,15 +236,29 @@ namespace Paint_1
 
             // Khoảng cách chuột đã di chuyển tính từ vị trí lúc bấm xuống
             // Tọa độ thế giới
-            Point o = (m - mouseDown);
+            Point o = (m - mouseDown) * rotationMat.GetInverse();
+            int sX = Math.Sign(o.X);
+            int sY = Math.Sign(o.Y);
+            
+            if (isInitialDraw)
+            {
+                if (sX == -1 && sY == 1)
+                    selectedCP = (int)EPos.BottomLeft;
+                else if (sX == 1 && sY == -1)
+                    selectedCP = (int)EPos.TopRight;
+                else if (sX == -1 && sY == -1)
+                    selectedCP = (int)EPos.TopLeft;
+                else
+                    selectedCP = (int)EPos.BottomRight;
+            }
+
+            Point p = controlPoints[selectedCP];
 
             // Nếu đang cầm điểm điều khuyển và hình không thể chỉnh tỷ lệ
             if (selectedCP >= 0 && isFixedScale)
             {
                 o = o * rotationMat.GetInverse();
-                float t = Math.Min(Math.Abs(o.X), Math.Abs(o.Y));
-                int sX = Math.Sign(o.X);
-                int sY = Math.Sign(o.Y);
+                float t = Math.Min(Math.Abs(o.X), Math.Abs(o.Y));                
 
                 if (selectedCP == (int)EPos.TopLeft || selectedCP == (int)EPos.BottomRight)
                 {
@@ -332,12 +317,7 @@ namespace Paint_1
                     maxCoord.Y = Math.Max(kv.Value.Y, maxCoord.Y);
                 }
             }
-
-            controlPoints[(int)EPos.TopLeft].Set(minCoord.X, minCoord.Y);
-            controlPoints[(int)EPos.TopRight].Set(maxCoord.X, minCoord.Y);
-            controlPoints[(int)EPos.BottomLeft].Set(minCoord.X, maxCoord.Y);
-            controlPoints[(int)EPos.BottomRight].Set(maxCoord.X, maxCoord.Y);
-
+           
             controlPoints[(int)EPos.Center] = (controlPoints[(int)EPos.TopLeft] + controlPoints[(int)EPos.BottomRight]) / 2;
 
             // Căng giữa 4 điểm nằm ở 4 phương
@@ -350,7 +330,9 @@ namespace Paint_1
             }
 
             if (controlPoints.ContainsKey((int)EPos.Rotation))
-                controlPoints[(int)EPos.Rotation] = controlPoints[(int)EPos.Center] + controlPoints[(int)EPos.RotationOffset];            
+                controlPoints[(int)EPos.Rotation] = controlPoints[(int)EPos.Center] + controlPoints[(int)EPos.RotationOffset];
+
+            ReCalcVerticies();
 
             return true;
         }

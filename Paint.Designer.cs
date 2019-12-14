@@ -49,6 +49,7 @@ namespace Paint_1
             this.label3 = new System.Windows.Forms.Label();
             this.label4 = new System.Windows.Forms.Label();
             this.avgFillTime = new System.Windows.Forms.Label();
+            this.avgDrawTime = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.openGLControl)).BeginInit();
             this.SuspendLayout();
             // 
@@ -152,6 +153,7 @@ namespace Paint_1
             this.lineWidth.Name = "lineWidth";
             this.lineWidth.Size = new System.Drawing.Size(43, 21);
             this.lineWidth.TabIndex = 13;
+            this.lineWidth.SelectedIndexChanged += new System.EventHandler(this._OnLineWidthChanged);
             // 
             // openGLControl
             // 
@@ -260,17 +262,28 @@ namespace Paint_1
             // 
             this.avgFillTime.AutoSize = true;
             this.avgFillTime.ForeColor = System.Drawing.SystemColors.ActiveCaptionText;
-            this.avgFillTime.Location = new System.Drawing.Point(332, 68);
+            this.avgFillTime.Location = new System.Drawing.Point(472, 40);
             this.avgFillTime.Name = "avgFillTime";
             this.avgFillTime.Size = new System.Drawing.Size(67, 13);
             this.avgFillTime.TabIndex = 23;
             this.avgFillTime.Text = "Avg Fill Time";
+            // 
+            // avgDrawTime
+            // 
+            this.avgDrawTime.AutoSize = true;
+            this.avgDrawTime.ForeColor = System.Drawing.SystemColors.ActiveCaptionText;
+            this.avgDrawTime.Location = new System.Drawing.Point(472, 9);
+            this.avgDrawTime.Name = "avgDrawTime";
+            this.avgDrawTime.Size = new System.Drawing.Size(80, 13);
+            this.avgDrawTime.TabIndex = 24;
+            this.avgDrawTime.Text = "Avg Draw Time";
             // 
             // Paint
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1058, 542);
+            this.Controls.Add(this.avgDrawTime);
             this.Controls.Add(this.avgFillTime);
             this.Controls.Add(this.label4);
             this.Controls.Add(this.label3);
@@ -319,6 +332,7 @@ namespace Paint_1
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.Label avgFillTime;
+        private System.Windows.Forms.Label avgDrawTime;
     }
 }
 

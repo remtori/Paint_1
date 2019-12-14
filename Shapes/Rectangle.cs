@@ -2,7 +2,7 @@
 
 namespace Paint_1
 {
-    class Rectangle : SimpleShape
+    class Rectangle : Shape
     {
         public Rectangle(float x, float y, float lw)
             : base(x, y, lw)
@@ -14,14 +14,16 @@ namespace Paint_1
             return EShape.RECTANGLE;
         }
 
-        protected override Point[] GetVerticies()
-        {            
-            return new Point[] {
-                controlPoints[(int)EPos.TopLeft],
-                controlPoints[(int)EPos.TopRight],
-                controlPoints[(int)EPos.BottomRight],
-                controlPoints[(int)EPos.BottomLeft]
-            };
+        protected override void ReCalcVerticies()
+        {
+            // 4 đỉnh của hình chữ nhật là 4 góc của control point nên k cần tính lại
+            if (!isInitialDraw) return;            
+
+            verticies.Clear();
+            verticies.Add(controlPoints[(int)EPos.TopLeft]);
+            verticies.Add(controlPoints[(int)EPos.TopRight]);
+            verticies.Add(controlPoints[(int)EPos.BottomRight]);
+            verticies.Add(controlPoints[(int)EPos.BottomLeft]);
         }
 
     }
