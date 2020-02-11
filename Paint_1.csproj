@@ -55,16 +55,29 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Form1.cs">
+    <Compile Include="Paint.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Form1.Designer.cs">
-      <DependentUpon>Form1.cs</DependentUpon>
+    <Compile Include="Paint.Designer.cs">
+      <DependentUpon>Paint.cs</DependentUpon>
     </Compile>
+    <Compile Include="Primitives\Mat2.cs" />
+    <Compile Include="Primitives\Point.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <EmbeddedResource Include="Form1.resx">
-      <DependentUpon>Form1.cs</DependentUpon>
+    <Compile Include="Shapes\Circle.cs" />
+    <Compile Include="Shapes\Ellipse.cs" />
+    <Compile Include="Shapes\Hexagon.cs" />
+    <Compile Include="Shapes\Pentagon.cs" />
+    <Compile Include="Shapes\Polygon.cs" />
+    <Compile Include="Shapes\Rectangle.cs" />
+    <Compile Include="Shapes\Shape.cs" />
+    <Compile Include="Shapes\Line.cs" />
+    <Compile Include="Shapes\ShapeColoringImpl.cs" />
+    <Compile Include="Shapes\Triangle.cs" />
+    <Compile Include="Types.cs" />
+    <EmbeddedResource Include="Paint.resx">
+      <DependentUpon>Paint.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
@@ -89,6 +102,60 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\cursorRotateE.cur" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\cursorRotateN.cur" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\cursorRotateNE.cur" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\cursorRotateNW.cur" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\cursorRotateS.cur" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\cursorRotateSE.cur" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\cursorRotateSW.cur" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\cursorRotateW.cur" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\DrawLine.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\circle.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\ellipse.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\hexagon.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\line.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\pentagon.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\polygon.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\rectangle.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\triangle.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\fill.cur" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
